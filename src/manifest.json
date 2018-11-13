@@ -1,0 +1,25 @@
+{
+    "version": "1",
+    "information": {
+        "name": "template",
+        "displayName": "UCRM Plugin Template",
+        "description": "A routed UCRM Plugin Template using the Slim Framework and Twig Template system.",
+        "url": "https://github.com/ucrm-plugins/template",
+        "version": "1.0.0",
+        "ucrmVersionCompliancy": {
+            "min": "2.14.0-beta2",
+            "max": null
+        },
+        "author": "Ryan Spaeth <rspaeth@mvqn.net>"
+    },
+    "configuration": [
+        {
+            "key": "verboseDebug",
+            "label": "Verbose Debugging?",
+            "description": "If enabled, will include verbose debug messages in the Webhook Request Body.",
+            "required": 0,
+            "type": "checkbox"
+        }
+    ]
+}
+
