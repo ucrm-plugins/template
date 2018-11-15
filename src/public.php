@@ -18,15 +18,8 @@ use UCRM\Routing\Middleware\PluginAuthentication;
 {
 
 
-    $app->get("/test/{name}",
-        function (Request $request, Response $response, array $args) use ($container): Response
-        {
-            return $this->views->render($response, "index.twig", [ "name" => $args["name"] ]);
-        }
-    )->add(new PluginAuthentication());
 
-
-    $app->get("/{file:.+}_{ext:jpg|png|pdf|txt|css|js}",
+    $app->get("/{file:.+}.{ext:jpg|png|pdf|txt|css|js}",
         function (Request $request, Response $response, array $args) use ($container)
         {
             $file = $args["file"];
@@ -59,9 +52,37 @@ use UCRM\Routing\Middleware\PluginAuthentication;
         }
     );
 
+    $app->get("/{file:.+}.{ext:htm|html|twig}",
+        function (Request $request, Response $response, array $args) use ($container)
+        {
+            $file = $args["file"] ?? "index";
+            $ext = $args["ext"] ?? "html";
+
+            $pathAsset = __DIR__."/www/$file.$ext";
+            $pathTemplate = __DIR__."/views/$file.$ext";
+
+            //var_dump($pathAsset);
+            //var_dump($pathTemplate);
 
 
-    $app->any("/[{file:.+}_{ext:php}]",
+            if ((file_exists($pathAsset) && !is_dir($pathAsset)) ||
+                (file_exists($pathTemplate) && !is_dir($pathTemplate)))
+            {
+                //var_dump("*");
+                return $this->twig->render($response, "$file.$ext");
+            }
+            elseif(file_exists($pathTemplate.".twig") && !is_dir($pathTemplate.".twig"))
+            {
+                //var_dump("**");
+                return $this->twig->render($response, "$file.$ext.twig");
+            }
+            else
+                return $container->get("notFoundHandler")($request, $response);
+        }
+    )->add(new PluginAuthentication());
+
+
+    $app->any("/[{file:.+}.{ext:php}]",
         function (Request $request, Response $response, array $args) use ($container)
         {
             $file = $args["file"] ?? "index";

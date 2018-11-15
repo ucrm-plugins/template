@@ -14,6 +14,7 @@
         "ext-zip": "*",
 
         "mvqn/localization": "1.*",
+        "mvqn/twig": "1.*",
 
         "ucrm-modules/common": "1.*",
         "ucrm-modules/rest": "1.*",
@@ -29,7 +30,7 @@
     },
     "autoload": {
         "psr-4": {
-            "UCRM\\": "src/UCRM"
+            "UCRM\\": "lib/UCRM"
         }
     },
     "autoload-dev": {

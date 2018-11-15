@@ -3,6 +3,8 @@ declare(strict_types=1);
 require_once __DIR__."/vendor/autoload.php";
 
 use MVQN\Localization\Translator;
+use MVQN\Localization\Exceptions\TranslatorException;
+
 use MVQN\REST\RestClient;
 
 use UCRM\Common\Log;
@@ -15,6 +17,8 @@ use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
+use Slim\Http\Environment;
+
 /**
  * bootstrap.php
  *
@@ -23,9 +27,17 @@ use Slim\Http\Response;
  * @author Ryan Spaeth <rspaeth@mvqn.net>
  */
 
+// =====================================================================================================================
+// ENVIRONMENT
+// =====================================================================================================================
+
 // IF there is a /.env file, THEN load it!
 if(file_exists(__DIR__."/../.env"))
     (new \Dotenv\Dotenv(__DIR__."/../"))->load();
+
+// =====================================================================================================================
+// PLUGIN SETTINGS
+// =====================================================================================================================
 
 // Initialize the Plugin libraries using this directory as the plugin root!
 Plugin::initialize(__DIR__);
@@ -33,7 +45,11 @@ Plugin::initialize(__DIR__);
 // Regenerate the Settings class, in case anything has changed in the manifest.json file.
 Plugin::createSettings("UCRM\\Plugins");
 
-// Generate the REST API URL.
+// =====================================================================================================================
+// REST CLIENT
+// =====================================================================================================================
+
+// Generate the REST API URL from either and .env file, ENV variable or fallback to localhost.
 $restUrl = (getenv("UCRM_REST_URL_DEV") ?: "http://localhost")."/api/v1.0";
 
 // Configure the REST Client...
@@ -43,61 +59,83 @@ RestClient::setHeaders([
     "X-Auth-App-Key: " . Settings::PLUGIN_APP_KEY
 ]);
 
+// =====================================================================================================================
+// LOCALIZATION
+// =====================================================================================================================
+
 // Set the dictionary directory and "default" locale.
 try
 {
     Translator::setDictionaryDirectory(__DIR__ . "/translations/");
     Translator::setCurrentLocale(str_replace("_", "-", Config::getLanguage()) ?: "en-US", true);
 }
-catch (\MVQN\Localization\Exceptions\TranslatorException $e)
+catch (TranslatorException $e)
 {
     Log::http("No dictionary could be found!", 500);
 }
 
-
-
-
+// =====================================================================================================================
+// ROUTING (SLIM)
+// =====================================================================================================================
 
 // Create Slim Framework Application, given the provided settings.
 $app = new \Slim\App([
     "settings" => [
         "displayErrorDetails" => true,
         "addContentLengthHeader" => false,
+        "determineRouteBeforeAppMiddleware" => true,
     ],
 ]);
 
 // Get a reference to the DI Container included with the Slim Framework.
 $container = $app->getContainer();
 
+// =====================================================================================================================
+// RENDERING (TWIG)
+// =====================================================================================================================
 
 // Configure Twig Renderer
-$container['views'] = function (Container $container)
+$container["twig"] = function (Container $container)
 {
-    $view = new \Slim\Views\Twig(__DIR__ . "/views/", [
-        //'cache' => 'path/to/cache'
-        "debug" => true,
-    ]);
+    //$twig = new \Slim\Views\Twig(__DIR__ . "/views/", [
+    $twig = new \Slim\Views\Twig(
+        [
+            __DIR__ . "/www/",
+            __DIR__ . "/views/",
+
+        ],
+        [
+            //'cache' => 'path/to/cache'
+            "debug" => true,
+        ]
+    );
 
     // Instantiate and add Slim specific extension
     $router = $container->get("router");
-    $uri = \Slim\Http\Uri::createFromEnvironment(new \Slim\Http\Environment($_SERVER));
-    $view->addExtension(new \Slim\Views\TwigExtension($router, $uri));
-    $view->addExtension(new Twig_Extension_Debug());
+    $uri = \Slim\Http\Uri::createFromEnvironment(new Environment($_SERVER));
+    $twig->addExtension(new \Slim\Views\TwigExtension($router, $uri));
+    $twig->addExtension(new Twig_Extension_Debug());
 
-    //$twig = $view->getEnvironment();
+    $twig->addExtension(new \MVQN\Twig\Extensions\SwitchExtension());
+    $twig->addExtension(new \UCRM\Twig\Extensions\PluginExtension());
 
-    return $view;
+    return $twig;
 };
 
-// Configure 404 Page
+// ---------------------------------------------------------------------------------------------------------------------
+
+// Override the default 404 Page!
 $container['notFoundHandler'] = function (Container $container)
 {
     return function(Request $request, Response $response) use ($container): Response
     {
-        return $container->views->render($response,"404.html");
+        return $container->twig->render($response,"404.html.twig");
     };
 };
 
+// =====================================================================================================================
+// LOGGING (MONOLOG)
+// =====================================================================================================================
 
 // Configure MonoLog
 $container['logger'] = function (\Slim\Container $container)
@@ -115,5 +153,5 @@ $container['logger'] = function (\Slim\Container $container)
 
 // Applied in Ascending order, bottom up!
 //$app->add(new \UCRM\Routing\Middleware\PluginAuthentication());
-$app->add(new \UCRM\Routing\Middleware\QueryStringRouter());
+$app->add(new \UCRM\Routing\Middleware\QueryStringRouter($container, [ __DIR__."/www/", __DIR__."/views/" ]));
 

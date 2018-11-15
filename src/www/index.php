@@ -12,8 +12,8 @@ echo "Home Page<br/>";
 //if(isset($_COOKIE))
 //    var_dump($_COOKIE);
 
-//if(isset($_GET))
-//    var_dump($_GET);
+if(isset($_GET))
+    var_dump($_GET);
 
 echo "<pre>";
 var_dump($_SERVER);
