@@ -14,9 +14,16 @@
     },
     "configuration": [
         {
-            "key": "verboseDebug",
-            "label": "Verbose Debugging?",
-            "description": "If enabled, will include verbose debug messages in the Webhook Request Body.",
+            "key": "development",
+            "label": "Development?",
+            "description": "If enabled, the system will force the plugin's environment to 'dev', regardless of the actual environment config.  NOTE: This should be disabled unless the plugin is not functioning correctly and debug information is needed!",
+            "required": 0,
+            "type": "checkbox"
+        },
+        {
+            "key": "verboseLogging",
+            "label": "Verbose Logging?",
+            "description": "If enabled, will include verbose debug messages in the logs.",
             "required": 0,
             "type": "checkbox"
         }

@@ -5,8 +5,8 @@ namespace UCRM\Routing\Middleware;
 
 use MVQN\Common\Strings;
 use Psr\Container\ContainerInterface;
-use Slim\Views\Twig;
-use Twig\Loader\FilesystemLoader;
+use Slim\Route;
+use Slim\Router;
 
 /**
  * Class QueryStringRouter
@@ -30,10 +30,15 @@ class QueryStringRouter
     // PROPERTIES
     // =================================================================================================================
 
+    /** @var ContainerInterface */
     protected $container;
 
+    /** @var Router */
+    protected $router;
+
     /** @var array A collection of paths to search for files when routing. */
-    protected $paths;
+    protected $assets;
+    protected $templates;
 
     // =================================================================================================================
     // CONSTRUCTOR/DESTRUCTOR
@@ -43,12 +48,15 @@ class QueryStringRouter
      * QueryStringRouter constructor.
      *
      * @param ContainerInterface $container
-     * @param array $paths
+     * @param array $assets
+     * @param array $templates
      */
-    public function __construct(ContainerInterface $container, array $paths)
+    public function __construct(ContainerInterface $container, array $assets, array $templates)
     {
         $this->container = $container;
-        $this->paths = $paths;
+        $this->router = $container->router;
+        $this->assets = $assets;
+        $this->templates = $templates;
     }
 
     // =================================================================================================================
@@ -78,7 +86,7 @@ class QueryStringRouter
             foreach ($extensions as $extension)
             {
                 // IF the current path with auto extension exists, THEN return the extension!
-                if (realpath($path . ".$extension") && !is_dir($path . ".$extension"))
+                if (realpath($path . ".$extension") && !is_dir($path . ".$extension")) // Handles DIR with '.'
                     return $extension;
             }
 
@@ -105,7 +113,7 @@ class QueryStringRouter
             $params = array_merge([ "/index" => "" ], $params);
 
         // Get the route from the first query string key.
-        $route = array_keys($params)[0];
+        $route = $original = array_keys($params)[0];
 
         // Remove the route from the list of query parameters, so that only the actual query parameters remain.
         array_shift($params);
@@ -125,21 +133,21 @@ class QueryStringRouter
         $extension = "";
 
         // Set a discovery flag.
-        $discovered = false;
+        $discovered = QueryStringRoute::ROUTE_TYPE_UNKNOWN;
 
         // Loop through each path provided...
-        foreach($this->paths as $templatePath)
+        foreach($this->assets as $assetPath)
         {
             // ---------------------------------------------------------------------------------------------------------
             // EXTENSION CHECK: EXACT!
             // ---------------------------------------------------------------------------------------------------------
 
-            $check = $this->autoExtension($templatePath . $directory . $filename);
+            $check = $this->autoExtension($assetPath . $directory . $filename);
 
             if($check !== null)
             {
                 $extension = $check;
-                $discovered = true;
+                $discovered = QueryStringRoute::ROUTE_TYPE_ASSET;
                 break;
             }
 
@@ -160,7 +168,84 @@ class QueryStringRouter
 
                 for($i = 0; $i <= $directoryUnderscores; $i++)
                 {
-                    var_dump($directoryTemp);
+                    //var_dump($directoryTemp);
+
+                    $filenameUnderscores = substr_count($filename, "_");
+
+                    $filenameTemp = $filename;
+
+                    for($j = 0; $j <= $filenameUnderscores; $j++)
+                    {
+
+                        $filenameTemp = Strings::replaceLast("_", ".", $filenameTemp);
+
+                        $extensionTemp = $this->autoExtension($assetPath . $directoryTemp . $filenameTemp);
+
+                        if($extensionTemp !== null)
+                        {
+                            $directory = $directoryTemp;
+                            $filename = Strings::replaceLast(".$extensionTemp", "", $filenameTemp);
+                            $extension = $extensionTemp;
+                            $discovered = QueryStringRoute::ROUTE_TYPE_ASSET;
+                            break;
+                        }
+                    }
+
+                    if($discovered)
+                        break;
+
+                    if($i !== $directoryUnderscores)
+                        $directoryTemp = Strings::replaceLast("_", ".", $directoryTemp);
+                }
+
+                if($discovered)
+                    break;
+            }
+        }
+
+        if($discovered)
+        {
+            $route = new QueryStringRoute($directory, $filename, $extension, $params);
+            $route->setOriginal($original);
+            $route->setType($discovered);
+
+            return $route;
+        }
+
+        // Loop through each path provided...
+        foreach($this->templates as $templatePath)
+        {
+            // ---------------------------------------------------------------------------------------------------------
+            // EXTENSION CHECK: EXACT!
+            // ---------------------------------------------------------------------------------------------------------
+
+            $check = $this->autoExtension($templatePath . $directory . $filename);
+
+            if($check !== null)
+            {
+                $extension = $check;
+                $discovered = QueryStringRoute::ROUTE_TYPE_TEMPLATE;
+                break;
+            }
+
+
+
+            // ---------------------------------------------------------------------------------------------------------
+            // EXTENSION CHECK: WITH POSSIBLE '.' CHARACTERS, SINCE THEY ARE PARSED AS '_'
+            // ---------------------------------------------------------------------------------------------------------
+
+            // IF the directory OR filename parts of the route contain ANY '_' characters...
+            if(Strings::contains($directory, "_") || Strings::contains($filename, "_"))
+            {
+                // Count the number of '_' characters in the directory part of the route.
+                $directoryUnderscores = substr_count($directory, "_");
+
+                // Set a temporary directory for manipulation.
+                $directoryTemp = $directory;
+
+                for($i = 0; $i <= $directoryUnderscores; $i++)
+                {
+                    //var_dump($directoryTemp);
 
                     $filenameUnderscores = substr_count($filename, "_");
 
@@ -178,7 +263,7 @@ class QueryStringRouter
                             $directory = $directoryTemp;
                             $filename = Strings::replaceLast(".$extensionTemp", "", $filenameTemp);
                             $extension = $extensionTemp;
-                            $discovered = true;
+                            $discovered = QueryStringRoute::ROUTE_TYPE_TEMPLATE;
                             break;
                         }
                     }
@@ -195,21 +280,30 @@ class QueryStringRouter
             }
         }
 
-
-
-
-        //if(!$discovered)
+        if($discovered)
         {
-            //return new QueryStringRoute("/", "404.html", "twig", []);
+            $route = new QueryStringRoute($directory, $filename, $extension, $params);
+            $route->setOriginal($original);
+            $route->setType($discovered);
+
+            return $route;
         }
 
+        // TODO: Check routes?
 
+        /** @var Route[] $routes */
+        $routes = $this->router->getRoutes();
 
+        foreach($routes as $r)
+        {
+            //echo $r->getPattern()."<br/>";
+        }
 
+        $route = new QueryStringRoute($directory, $filename, $extension, $params);
+        $route->setOriginal($original);
+        $route->setType(QueryStringRoute::ROUTE_TYPE_ROUTE);
 
-        return new QueryStringRoute($directory, $filename, $extension, $params);
-
-
+        return $route;
     }
 
 
@@ -231,14 +325,9 @@ class QueryStringRouter
         // QUERY PARAMETERS
         // -------------------------------------------------------------------------------------------------------------
 
-
-
-
         $route = $this->parseRoute($params);
 
-        echo $route;
-
-
+        //echo "<pre>$route</pre>";
 
         $uri = $request->getUri()
             ->withPath($route->getUrl())
@@ -246,16 +335,20 @@ class QueryStringRouter
 
         $request = $request
             ->withUri($uri)
-            ->withQueryParams($params);
-
-        $queryUrl = $route->getFilename() === "index" ? $route->getDirectory() : $route->getUrl();
+            ->withQueryParams($route->getQuery())
+            ->withAttribute("vRoute", $route);
 
         // Be sure to clear the PATH from the GET parameters, so as to not confuse the end-user!
-        if(isset($_GET) && array_key_exists($queryUrl, $_GET))
-            unset($_GET[$queryUrl]);
+        if(isset($_GET) && array_key_exists($route->getOriginal(), $_GET))
+            unset($_GET[$route->getOriginal()]);
 
-        $response = $next($request, $response);
+        if(isset($_SERVER) && array_key_exists("QUERY_STRING", $_SERVER))
+            $_SERVER["QUERY_STRING"] = $route->getQueryString();
 
-        return $response;
+        //echo "<pre>";
+        //var_dump($request);
+        //echo "</pre>";
+
+        return $next($request, $response);
     }
 }

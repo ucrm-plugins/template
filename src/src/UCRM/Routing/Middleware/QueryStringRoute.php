@@ -5,6 +5,11 @@ namespace UCRM\Routing\Middleware;
 
 class QueryStringRoute
 {
+    public const ROUTE_TYPE_UNKNOWN     = 0;
+    public const ROUTE_TYPE_ASSET       = 1;
+    public const ROUTE_TYPE_TEMPLATE    = 2;
+    public const ROUTE_TYPE_ROUTE       = 4;
+
     /** @var string */
     protected $directory;
 
@@ -16,6 +21,12 @@ class QueryStringRoute
 
     /** @var array */
     protected $query;
+
+    /** @var string */
+    protected $original;
+
+    /** @var int */
+    protected $type;
 
 
 
@@ -48,7 +59,6 @@ class QueryStringRoute
     }
 
 
-
     public function getUrl(): string
     {
         return $this->directory.$this->filename.($this->extension !== "" ? ".$this->extension" : "");
@@ -67,10 +77,38 @@ class QueryStringRoute
     }
 
 
+    public function getOriginal() : string
+    {
+        return $this->original;
+    }
+
+    public function setOriginal(string $original): QueryStringRoute
+    {
+        $this->original = $original;
+        return $this;
+    }
+
+    public function getType() : int
+    {
+        return $this->type;
+    }
+
+    public function setType(int $type): QueryStringRoute
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+
+
+
+
+
+
 
     public function __toString()
     {
-        return json_encode(get_object_vars($this), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        return json_encode(get_object_vars($this), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
 
 

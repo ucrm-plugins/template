@@ -7,6 +7,12 @@ namespace UCRM\Routing\Models;
 class AppGlobals
 {
     /** @var string */
+    public $env;
+
+    /** @var bool */
+    public $debug;
+
+    /** @var string */
     public $hostUrl;
 
     /** @var string */

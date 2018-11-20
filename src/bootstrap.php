@@ -33,7 +33,14 @@ use Slim\Http\Environment;
 
 // IF there is a /.env file, THEN load it!
 if(file_exists(__DIR__."/../.env"))
-    (new \Dotenv\Dotenv(__DIR__."/../"))->load();
+{
+    define("PLUGIN_ENV", "dev");
+    (new \Dotenv\Dotenv(__DIR__ . "/../"))->load();
+}
+else
+{
+    define("PLUGIN_ENV", "prod");
+}
 
 // =====================================================================================================================
 // PLUGIN SETTINGS
@@ -117,7 +124,7 @@ $container["twig"] = function (Container $container)
     $twig->addExtension(new Twig_Extension_Debug());
 
     $twig->addExtension(new \MVQN\Twig\Extensions\SwitchExtension());
-    $twig->addExtension(new \UCRM\Twig\Extensions\PluginExtension());
+    $twig->addExtension(new \UCRM\Twig\Extensions\PluginExtension($container));
 
     return $twig;
 };
@@ -129,7 +136,15 @@ $container['notFoundHandler'] = function (Container $container)
 {
     return function(Request $request, Response $response) use ($container): Response
     {
-        return $container->twig->render($response,"404.html.twig");
+        /** @var \Slim\Router $router */
+        $router = $container->get("router");
+
+        $data = [
+            "vRoute" => $request->getAttribute("vRoute"),
+            "router" => $router,
+        ];
+
+        return $container->twig->render($response,"404.html.twig", $data);
     };
 };
 
@@ -153,5 +168,5 @@ $container['logger'] = function (\Slim\Container $container)
 
 // Applied in Ascending order, bottom up!
 //$app->add(new \UCRM\Routing\Middleware\PluginAuthentication());
-$app->add(new \UCRM\Routing\Middleware\QueryStringRouter($container, [ __DIR__."/www/", __DIR__."/views/" ]));
+$app->add(new \UCRM\Routing\Middleware\QueryStringRouter($container, [__DIR__."/www/"], [__DIR__."/views/"]));
 

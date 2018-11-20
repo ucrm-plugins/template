@@ -16,8 +16,25 @@ use UCRM\Routing\Middleware\PluginAuthentication;
  */
 (function() use ($app, $container)
 {
+    // -----------------------------------------------------------------------------------------------------------------
+    // ADD CUSTOM ROUTES HERE...
+    // -----------------------------------------------------------------------------------------------------------------
+
+    $app->get("/example",
+        function (Request $request, Response $response, array $args) use ($container)
+        {
+            return $response->write("This is an example route!");
+        }
+    );
+
+    // ...
 
 
+
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // HTTP GET: ASSET
+    // -----------------------------------------------------------------------------------------------------------------
 
     $app->get("/{file:.+}.{ext:jpg|png|pdf|txt|css|js}",
         function (Request $request, Response $response, array $args) use ($container)
@@ -50,7 +67,11 @@ use UCRM\Routing\Middleware\PluginAuthentication;
             // Then return the response!
             return $response;
         }
-    );
+    )->setName("asset"); // NO Authentication necessary here!
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // HTTP GET: TEMPLATE
+    // -----------------------------------------------------------------------------------------------------------------
 
     $app->get("/{file:.+}.{ext:htm|html|twig}",
         function (Request $request, Response $response, array $args) use ($container)
@@ -58,31 +79,32 @@ use UCRM\Routing\Middleware\PluginAuthentication;
             $file = $args["file"] ?? "index";
             $ext = $args["ext"] ?? "html";
 
-            $pathAsset = __DIR__."/www/$file.$ext";
-            $pathTemplate = __DIR__."/views/$file.$ext";
+            $assets = __DIR__."/www/$file.$ext";
+            $templates = __DIR__."/views/$file.$ext";
 
-            //var_dump($pathAsset);
-            //var_dump($pathTemplate);
+            /** @var \Slim\Router $router */
+            $router = $container->get("router");
 
+            $data = [
+                "request" => $request,
+                "vRoute" => $request->getAttribute("vRoute"),
+                "router" => $router,
+            ];
 
-            if ((file_exists($pathAsset) && !is_dir($pathAsset)) ||
-                (file_exists($pathTemplate) && !is_dir($pathTemplate)))
-            {
-                //var_dump("*");
-                return $this->twig->render($response, "$file.$ext");
-            }
-            elseif(file_exists($pathTemplate.".twig") && !is_dir($pathTemplate.".twig"))
-            {
-                //var_dump("**");
-                return $this->twig->render($response, "$file.$ext.twig");
-            }
+            if ((file_exists($assets) && !is_dir($assets)) || (file_exists($templates) && !is_dir($templates)))
+                return $this->twig->render($response, "$file.$ext", $data);
+            elseif(file_exists($templates.".twig") && !is_dir($templates.".twig"))
+                return $this->twig->render($response, "$file.$ext.twig", $data);
             else
-                return $container->get("notFoundHandler")($request, $response);
+                return $container->get("notFoundHandler")($request, $response, $data);
         }
-    )->add(new PluginAuthentication());
+    )->add(new PluginAuthentication())->setName("template");;
 
+    // -----------------------------------------------------------------------------------------------------------------
+    // HTTP GET/POST: SCRIPT
+    // -----------------------------------------------------------------------------------------------------------------
 
-    $app->any("/[{file:.+}.{ext:php}]",
+    $app->map([ "GET", "POST" ], "/{file:.+}.{ext:php}",
         function (Request $request, Response $response, array $args) use ($container)
         {
             $file = $args["file"] ?? "index";
@@ -90,8 +112,17 @@ use UCRM\Routing\Middleware\PluginAuthentication;
 
             $path = __DIR__."/www/$file.$ext";
 
+            /** @var \Slim\Router $router */
+            $router = $container->get("router");
+
+            $data = [
+                "request" => $request,
+                "vRoute" => $request->getAttribute("vRoute"),
+                "router" => $router,
+            ];
+
             if(!file_exists($path))
-                return $container->get("notFoundHandler")($request, $response);
+                return $container->get("notFoundHandler")($request, $response, $data);
 
             // Pass execution to the specified PHP file.
             include $path;
@@ -100,7 +131,7 @@ use UCRM\Routing\Middleware\PluginAuthentication;
             die();
 
         }
-    )->add(new PluginAuthentication());
+    )->add(new PluginAuthentication())->setName("script");
 
     // Run the Slim Framework Application!
     $app->run();
