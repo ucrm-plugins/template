@@ -12,10 +12,23 @@
         visit the Plugin's home page at the link below.
     </p>
 
-    <pre>{{ route() }}</pre>
-    <pre>{{ query() }}</pre>
+    {# @var \UCRM\Routing\Models\AppGlobals app #}
 
-    {{ test }}
+    {% if app.env == "dev" or app.debug %}
+
+        Virtual Route:
+        <pre style="margin-top:0;">
+            {{- vRoute -}}
+        </pre>
+
+        Known Routes:
+        <pre style="margin-top:0;">
+            {%- for route in router.getRoutes -%}
+                {{ "    " }}{{ route.getPattern }}{{ "\n" }}
+            {%- endfor -%}
+        </pre>
+
+    {% endif %}
 
     <a href="{{ link("/") }}">Visit the Home Page</a>
 </body>

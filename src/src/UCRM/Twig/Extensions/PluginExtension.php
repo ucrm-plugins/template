@@ -32,14 +32,12 @@ final class PluginExtension extends \Twig_Extension implements \Twig_Extension_G
     }
     */
 
-    /*
     protected $container;
 
     public function __construct(Container $container)
     {
         $this->container = $container;
     }
-    */
 
     public function getName(): string
     {
@@ -65,8 +63,8 @@ final class PluginExtension extends \Twig_Extension implements \Twig_Extension_G
     {
         return [
             new \Twig_SimpleFunction("link", [$this, "link"]),
-            new \Twig_SimpleFunction("route", [$this, "route"]),
-            new \Twig_SimpleFunction("query", [$this, "query"]),
+            //new \Twig_SimpleFunction("route", [$this, "route"]),
+            //new \Twig_SimpleFunction("query", [$this, "query"]),
         ];
     }
 
@@ -80,6 +78,7 @@ final class PluginExtension extends \Twig_Extension implements \Twig_Extension_G
     }
 
 
+    /*
     public function route(): ?string
     {
         if(isset($_SERVER) && array_key_exists("PLUGIN_ROUTE", $_SERVER))
@@ -95,6 +94,7 @@ final class PluginExtension extends \Twig_Extension implements \Twig_Extension_G
 
         return null;
     }
+    */
 
 
 
@@ -104,8 +104,12 @@ final class PluginExtension extends \Twig_Extension implements \Twig_Extension_G
 
     public function getGlobals(): array
     {
+
         $this->globals = new AppGlobals(
         [
+            "env" => Plugin::environment(),
+            "debug" => Settings::getDevelopment(),
+
             "hostUrl" => rtrim(Settings::UCRM_PUBLIC_URL, "/"),
             "baseUrl" => "/_plugins/".Settings::PLUGIN_NAME."/public.php",
             //"baseUrl" => Settings::PLUGIN_PUBLIC_URL,
@@ -118,7 +122,7 @@ final class PluginExtension extends \Twig_Extension implements \Twig_Extension_G
         ]);
 
         return [
-            "app" => $this->globals
+            "app" => $this->globals,
         ];
     }
 
