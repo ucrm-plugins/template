@@ -19,7 +19,7 @@ class QueryStringRoute
 
 
 
-    public function __construct(string $directory, string $filename, string $extension, array $query = [])
+    public function __construct(string $directory, string $filename, string $extension, ?array $query = [])
     {
         $this->directory = $directory;
         $this->filename = $filename;

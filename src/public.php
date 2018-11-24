@@ -3,6 +3,8 @@ declare(strict_types=1);
 require __DIR__ . "/vendor/autoload.php";
 require __DIR__ . "/bootstrap.php";
 
+use UCRM\Sessions\SessionUser;
+
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -92,6 +94,10 @@ use UCRM\Routing\Middleware\PluginAuthentication;
 
             if(!file_exists($path))
                 return $container->get("notFoundHandler")($request, $response);
+
+            /** @noinspection PhpUnusedLocalVariableInspection */
+            /** @var SessionUser $user */
+            $user = $request->getAttribute("user");
 
             // Pass execution to the specified PHP file.
             include $path;

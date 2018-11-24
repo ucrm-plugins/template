@@ -14,9 +14,16 @@
     },
     "configuration": [
         {
-            "key": "verboseDebug",
-            "label": "Verbose Debugging?",
-            "description": "If enabled, will include verbose debug messages in the Webhook Request Body.",
+            "key": "development",
+            "label": "Development?",
+            "description": "If enabled, will override the environment by setting it to Development.",
+            "required": 0,
+            "type": "checkbox"
+        },
+        {
+            "key": "verboseLogging",
+            "label": "Verbose Logging?",
+            "description": "If enabled, will append additional \"verbose\" information to the logs.",
             "required": 0,
             "type": "checkbox"
         }

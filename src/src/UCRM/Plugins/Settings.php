@@ -1,5 +1,5 @@
-<?php
-/** @noinspection SpellCheckingInspection */declare(strict_types=1);
+<?php /** @noinspection SpellCheckingInspection */
+declare(strict_types=1);
 
 namespace UCRM\Plugins;
 
@@ -8,7 +8,8 @@ use UCRM\Common\SettingsBase;
 /**
  * @author Ryan Spaeth <rspaeth@mvqn.net>
  *
- * @method static bool|null getVerboseDebug()
+ * @method static bool|null getDevelopment()
+ * @method static bool|null getVerboseLogging()
  */
 final class Settings extends SettingsBase
 {
@@ -33,15 +34,24 @@ final class Settings extends SettingsBase
 	/** @const string The publicly accessible URL of this UCRM, null if not configured in UCRM. */
 	public const UCRM_PUBLIC_URL = 'http://ucrm.dev.mvqn.net/';
 
+	/** @const string The locally accessible URL of this UCRM, null if not configured in UCRM. */
+	public const UCRM_LOCAL_URL = 'http://localhost/';
+
 	/** @const string The publicly accessible URL assigned to this Plugin by the UCRM. */
 	public const PLUGIN_PUBLIC_URL = 'http://ucrm.dev.mvqn.net/_plugins/template/public.php';
 
 	/** @const string An automatically generated UCRM API 'App Key' with read/write access. */
-	public const PLUGIN_APP_KEY = 'DrWL+nvuoqNW/TNSZ4OkXz+7YHxU3CZQjbFOo3JGS94sfVisiZi6rGWLuNYLuxh4';
+	public const PLUGIN_APP_KEY = 'WlBRTdYb5u1CqJicbsQSyk2RSZnpSmUm0WHONAfRZIar2+uxjlP2BRCLl529BuAp';
 
 	/**
-	 * Verbose Debugging?
-	 * @var bool|null If enabled, will include verbose debug messages in the Webhook Request Body.
+	 * Development?
+	 * @var bool|null If enabled, will override the environment by setting it to Development.
 	 */
-	protected static $verboseDebug;
+	protected static $development;
+
+	/**
+	 * Verbose Logging?
+	 * @var bool|null If enabled, will append additional "verbose" information to the logs.
+	 */
+	protected static $verboseLogging;
 }

@@ -9,7 +9,8 @@ use UCRM\Common\Log;
 use UCRM\Common\Plugin;
 use UCRM\REST\Endpoints\Client;
 use UCRM\REST\Endpoints\User;
-use UCRM\Sessions\PluginSession;
+use UCRM\Sessions\Session;
+use UCRM\Sessions\SessionUser;
 
 class PluginAuthentication
 {
@@ -35,16 +36,16 @@ class PluginAuthentication
             session_start();
 
         // Get the currently authenticated User, while also capturing the actual '/current-user' response!
-        $user = User::getByAuthenticated($authenticated);
+        $user = Session::getCurrentUser();
 
         // Display an error if no user is authenticated!
-        if(!$authenticated)
+        if(!$user)
             Log::http("No User is currently Authenticated!", 401);
 
         // Display an error if the authenticated user is NOT an Admin!
-        if(!array_key_exists("userGroup", $authenticated) || $authenticated["userGroup"] !== "Admin Group")
+        if($user->getUserGroup() !== "Admin Group")
             Log::http("Currently Authenticated User is not an Admin!", 401);
 
-        return $next($request, $response);
+        return $next($request->withAttribute("user", $user), $response);
     }
 }

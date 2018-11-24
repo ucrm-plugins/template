@@ -30,7 +30,7 @@
     },
     "autoload": {
         "psr-4": {
-            "UCRM\\": "lib/UCRM"
+            "UCRM\\": "src/UCRM"
         }
     },
     "autoload-dev": {

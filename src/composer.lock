@@ -533,16 +533,16 @@
         },
         {
             "name": "mvqn/dynamics",
-            "version": "1.2.3",
+            "version": "1.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mvqn/dynamics.git",
-                "reference": "21558f03f954068bee537a6502d36a5d0605b972"
+                "reference": "6055fbc865cec56dbf0d22d6870f76b1774d3a26"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mvqn/dynamics/zipball/21558f03f954068bee537a6502d36a5d0605b972",
-                "reference": "21558f03f954068bee537a6502d36a5d0605b972",
+                "url": "https://api.github.com/repos/mvqn/dynamics/zipball/6055fbc865cec56dbf0d22d6870f76b1774d3a26",
+                "reference": "6055fbc865cec56dbf0d22d6870f76b1774d3a26",
                 "shasum": ""
             },
             "require": {
@@ -572,7 +572,7 @@
                 }
             ],
             "description": "A library for dynamic objects and methods.",
-            "time": "2018-11-07T23:44:52+00:00"
+            "time": "2018-11-24T04:39:24+00:00"
         },
         {
             "name": "mvqn/localization",
@@ -618,16 +618,16 @@
         },
         {
             "name": "mvqn/rest",
-            "version": "1.2.6",
+            "version": "1.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mvqn/rest.git",
-                "reference": "2cea6bbfab6b1dd1409c85c5a446a8efa3f30916"
+                "reference": "fa6d1d853d01e76235cec99a804f2c6e9f1e0b69"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mvqn/rest/zipball/2cea6bbfab6b1dd1409c85c5a446a8efa3f30916",
-                "reference": "2cea6bbfab6b1dd1409c85c5a446a8efa3f30916",
+                "url": "https://api.github.com/repos/mvqn/rest/zipball/fa6d1d853d01e76235cec99a804f2c6e9f1e0b69",
+                "reference": "fa6d1d853d01e76235cec99a804f2c6e9f1e0b69",
                 "shasum": ""
             },
             "require": {
@@ -659,7 +659,7 @@
                 }
             ],
             "description": "A simple REST Client library for interfacing with generic REST Endpoints.",
-            "time": "2018-11-13T04:10:38+00:00"
+            "time": "2018-11-19T22:17:44+00:00"
         },
         {
             "name": "mvqn/twig",
@@ -1088,16 +1088,16 @@
         },
         {
             "name": "psr/log",
-            "version": "1.0.2",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d"
+                "reference": "6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
-                "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd",
+                "reference": "6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd",
                 "shasum": ""
             },
             "require": {
@@ -1131,7 +1131,7 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2016-10-10T12:19:37+00:00"
+            "time": "2018-11-20T15:27:04+00:00"
         },
         {
             "name": "slim/slim",
@@ -1490,16 +1490,16 @@
         },
         {
             "name": "ucrm-modules/common",
-            "version": "1.0.7",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ucrm-modules/common.git",
-                "reference": "5ba13ce938923aa9bd68086edd561bcb1ee30cef"
+                "reference": "f22f3c528a002d56b897eae8a878ae70db01d904"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ucrm-modules/common/zipball/5ba13ce938923aa9bd68086edd561bcb1ee30cef",
-                "reference": "5ba13ce938923aa9bd68086edd561bcb1ee30cef",
+                "url": "https://api.github.com/repos/ucrm-modules/common/zipball/f22f3c528a002d56b897eae8a878ae70db01d904",
+                "reference": "f22f3c528a002d56b897eae8a878ae70db01d904",
                 "shasum": ""
             },
             "require": {
@@ -1510,6 +1510,7 @@
                 "ext-zip": "*",
                 "mvqn/data": "1.*",
                 "mvqn/dynamics": "1.*",
+                "mvqn/rest": "1.*",
                 "nette/php-generator": "~3.2",
                 "php": "~7.1",
                 "ucrm-modules/data": "1.*"
@@ -1534,8 +1535,8 @@
                     "email": "rspaeth@mvqn.net"
                 }
             ],
-            "description": "A common set of helper classes to ease UCRM Plugin development.",
-            "time": "2018-11-13T22:27:40+00:00"
+            "description": "A common set of classes to ease UCRM Plugin development.",
+            "time": "2018-11-24T04:48:55+00:00"
         },
         {
             "name": "ucrm-modules/data",
@@ -1585,16 +1586,16 @@
         },
         {
             "name": "ucrm-modules/rest",
-            "version": "1.0.4",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ucrm-modules/rest.git",
-                "reference": "eb8dee8fe08d39734170358e06663de8ab46a973"
+                "reference": "ffce59ef2b9eb4746192d72139205b68f1a38bf3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ucrm-modules/rest/zipball/eb8dee8fe08d39734170358e06663de8ab46a973",
-                "reference": "eb8dee8fe08d39734170358e06663de8ab46a973",
+                "url": "https://api.github.com/repos/ucrm-modules/rest/zipball/ffce59ef2b9eb4746192d72139205b68f1a38bf3",
+                "reference": "ffce59ef2b9eb4746192d72139205b68f1a38bf3",
                 "shasum": ""
             },
             "require": {
@@ -1627,7 +1628,7 @@
                 }
             ],
             "description": "A simple REST Client library for interfacing with UCRM Endpoints.",
-            "time": "2018-11-13T05:06:18+00:00"
+            "time": "2018-11-23T23:38:51+00:00"
         }
     ],
     "packages-dev": [
