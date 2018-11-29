@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
-namespace UCRM\Twig\Extensions;
+namespace App\Middleware\Twig;
 
 use MVQN\Localization\Translator;
+use Slim\App;
 use Slim\Container;
 use Slim\Router;
 use UCRM\Common\Plugin;
-use UCRM\Plugins\Settings;
-use UCRM\Routing\Models\AppGlobals;
+use App\Settings;
 
 /**
  * Class Extension
@@ -18,19 +18,6 @@ use UCRM\Routing\Models\AppGlobals;
  */
 final class PluginExtension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
 {
-    /*
-    private $subject = "";
-
-    public function setSubject(string $subject)
-    {
-        $this->subject = $subject;
-    }
-
-    public function getSubject()
-    {
-        return $this->subject;
-    }
-    */
 
     protected $container;
 
@@ -39,9 +26,11 @@ final class PluginExtension extends \Twig_Extension implements \Twig_Extension_G
         $this->container = $container;
     }
 
+
+
     public function getName(): string
     {
-        return "common";
+        return "plugin";
     }
 
     public function getTokenParsers(): array
@@ -99,32 +88,43 @@ final class PluginExtension extends \Twig_Extension implements \Twig_Extension_G
 
 
 
-    /** @var AppGlobals */
-    protected $globals;
+    /** @var array */
+    protected static $globals;
+
+
 
     public function getGlobals(): array
     {
+        if(self::$globals === null)
+        {
+            self::$globals =
+                [
+                    "env" => Plugin::environment(),
+                    "debug" => Settings::getDevelopment(),
 
-        $this->globals = new AppGlobals(
-        [
-            "env" => Plugin::environment(),
-            "debug" => Settings::getDevelopment(),
+                    "hostUrl" => rtrim(Settings::UCRM_PUBLIC_URL, "/"),
+                    "baseUrl" => "/_plugins/" . Settings::PLUGIN_NAME . "/public.php",
+                    //"baseUrl" => Settings::PLUGIN_PUBLIC_URL,
+                    "homeRoute" => "?/",
 
-            "hostUrl" => rtrim(Settings::UCRM_PUBLIC_URL, "/"),
-            "baseUrl" => "/_plugins/".Settings::PLUGIN_NAME."/public.php",
-            //"baseUrl" => Settings::PLUGIN_PUBLIC_URL,
-            "homeRoute" => "?/",
+                    "locale" => Translator::getCurrentLocale(),
 
-            "locale" => Translator::getCurrentLocale(),
+                    "pluginName" => Settings::PLUGIN_NAME,
 
-            "pluginName" => Settings::PLUGIN_NAME,
-
-        ]);
+                ];
+        }
 
         return [
-            "app" => $this->globals,
+            "app" => self::$globals,
         ];
     }
 
+    public static function setGlobal(string $name, $value)
+    {
+        if(self::$globals === null)
+            self::$globals = [ $name => $value ];
+
+        self::$globals[$name] = $value;
+    }
 
 }

@@ -11,7 +11,8 @@ use UCRM\Common\Log;
 use UCRM\Common\Plugin;
 
 use UCRM\Common\Config;
-use UCRM\Plugins\Settings;
+
+use App\Settings;
 
 use Slim\Container;
 use Slim\Http\Request;
@@ -28,21 +29,6 @@ use Slim\Http\Environment;
  */
 
 // =====================================================================================================================
-// ENVIRONMENT
-// =====================================================================================================================
-
-// IF there is a /.env file, THEN load it!
-if(file_exists(__DIR__."/../.env"))
-{
-    define("PLUGIN_ENV", "dev");
-    (new \Dotenv\Dotenv(__DIR__ . "/../"))->load();
-}
-else
-{
-    define("PLUGIN_ENV", "prod");
-}
-
-// =====================================================================================================================
 // PLUGIN SETTINGS
 // =====================================================================================================================
 
@@ -50,14 +36,18 @@ else
 Plugin::initialize(__DIR__);
 
 // Regenerate the Settings class, in case anything has changed in the manifest.json file.
-Plugin::createSettings("UCRM\\Plugins");
+Plugin::createSettings("App", "Settings", __DIR__);
 
 // =====================================================================================================================
 // REST CLIENT
 // =====================================================================================================================
 
-// Generate the REST API URL from either and .env file, ENV variable or fallback to localhost.
-$restUrl = (getenv("UCRM_REST_URL_DEV") ?: "http://localhost")."/api/v1.0";
+if(file_exists(__DIR__."/../.env")) (new \Dotenv\Dotenv(__DIR__."/../"))->load();
+
+// Generate the REST API URL from either an ENV variable (including from .env file),  or fallback to localhost.
+$restUrl = rtrim(getenv("UCRM_REST_URL") ?: Settings::UCRM_LOCAL_URL ?: "https://localhost/", "/")."/api/v1.0";
+
+echo $restUrl;
 
 // Configure the REST Client...
 RestClient::setBaseUrl($restUrl); //Settings::UCRM_PUBLIC_URL . "api/v1.0");
@@ -104,11 +94,10 @@ $container = $app->getContainer();
 // Configure Twig Renderer
 $container["twig"] = function (Container $container)
 {
-    //$twig = new \Slim\Views\Twig(__DIR__ . "/views/", [
     $twig = new \Slim\Views\Twig(
         [
-            __DIR__ . "/www/",
-            __DIR__ . "/views/",
+            //__DIR__ . "/www/",
+            __DIR__ . "/app/Views/",
 
         ],
         [
@@ -120,11 +109,22 @@ $container["twig"] = function (Container $container)
     // Instantiate and add Slim specific extension
     $router = $container->get("router");
     $uri = \Slim\Http\Uri::createFromEnvironment(new Environment($_SERVER));
+
+    $query = $uri->getQuery();
+    var_dump($query);
+
+    //$route = \App\Middleware\QueryStringRouter::extractRouteFromQueryString($query);
+
+    //$uri = $uri
+    //    ->withPath($route)
+    //    ->withQuery($query);
+
+    var_dump($uri);
     $twig->addExtension(new \Slim\Views\TwigExtension($router, $uri));
     $twig->addExtension(new Twig_Extension_Debug());
 
     $twig->addExtension(new \MVQN\Twig\Extensions\SwitchExtension());
-    $twig->addExtension(new \UCRM\Twig\Extensions\PluginExtension($container));
+    $twig->addExtension(new \App\Middleware\Twig\PluginExtension($container));
 
     return $twig;
 };
@@ -158,7 +158,7 @@ $container['logger'] = function (\Slim\Container $container)
     $logger = new Monolog\Logger("template-plugin");
     $logger->pushProcessor(new Monolog\Processor\UidProcessor());
     $logger->pushHandler(new Monolog\Handler\StreamHandler(
-        PHP_SAPI === "cli-server" ? "php://stdout" : __DIR__ . "/logs/app.log",
+        PHP_SAPI === "cli-server" ? "php://stdout" : __DIR__ . "/logs/www.log",
         \Monolog\Logger::DEBUG
     ));
     return $logger;
@@ -167,6 +167,6 @@ $container['logger'] = function (\Slim\Container $container)
 
 
 // Applied in Ascending order, bottom up!
-//$app->add(new \UCRM\Routing\Middleware\PluginAuthentication());
-$app->add(new \UCRM\Routing\Middleware\QueryStringRouter($container, [__DIR__."/www/"], [__DIR__."/views/"]));
+//$www->add(new \UCRM\Routing\Middleware\PluginAuthentication());
+$app->add(new \App\Middleware\QueryStringRouter($container, [__DIR__ . "/www/"], [__DIR__."/app/Views/"]));
 

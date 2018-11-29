@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace UCRM\Routing\Controllers;
+namespace App\Controllers;
 
 use Psr\Container\ContainerInterface;
 use Slim\Http\Request;

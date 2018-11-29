@@ -6,7 +6,7 @@ require __DIR__ . "/bootstrap.php";
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-use UCRM\Routing\Middleware\PluginAuthentication;
+use App\Middleware\PluginAuthentication;
 
 /**
  * Use an immediately invoked function here, to avoid global namespace pollution...
@@ -16,6 +16,9 @@ use UCRM\Routing\Middleware\PluginAuthentication;
  */
 (function() use ($app, $container)
 {
+
+
+
     // -----------------------------------------------------------------------------------------------------------------
     // ADD CUSTOM ROUTES HERE...
     // -----------------------------------------------------------------------------------------------------------------
@@ -79,8 +82,8 @@ use UCRM\Routing\Middleware\PluginAuthentication;
             $file = $args["file"] ?? "index";
             $ext = $args["ext"] ?? "html";
 
-            $assets = __DIR__."/www/$file.$ext";
-            $templates = __DIR__."/views/$file.$ext";
+            $assets = __DIR__ . "/www/$file.$ext";
+            $templates = __DIR__."/app/Views/$file.$ext";
 
             /** @var \Slim\Router $router */
             $router = $container->get("router");
@@ -98,7 +101,7 @@ use UCRM\Routing\Middleware\PluginAuthentication;
             else
                 return $container->get("notFoundHandler")($request, $response, $data);
         }
-    )->add(new PluginAuthentication())->setName("template");;
+    )->add(new PluginAuthentication($container))->setName("template");;
 
     // -----------------------------------------------------------------------------------------------------------------
     // HTTP GET/POST: SCRIPT
@@ -110,7 +113,7 @@ use UCRM\Routing\Middleware\PluginAuthentication;
             $file = $args["file"] ?? "index";
             $ext = $args["ext"] ?? "php";
 
-            $path = __DIR__."/www/$file.$ext";
+            $path = __DIR__ . "/www/$file.$ext";
 
             /** @var \Slim\Router $router */
             $router = $container->get("router");
@@ -131,7 +134,7 @@ use UCRM\Routing\Middleware\PluginAuthentication;
             die();
 
         }
-    )->add(new PluginAuthentication())->setName("script");
+    )->add(new PluginAuthentication($container))->setName("script");
 
     // Run the Slim Framework Application!
     $app->run();
