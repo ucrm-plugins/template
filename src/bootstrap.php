@@ -47,7 +47,7 @@ if(file_exists(__DIR__."/../.env")) (new \Dotenv\Dotenv(__DIR__."/../"))->load()
 // Generate the REST API URL from either an ENV variable (including from .env file),  or fallback to localhost.
 $restUrl = rtrim(getenv("UCRM_REST_URL") ?: Settings::UCRM_LOCAL_URL ?: "https://localhost/", "/")."/api/v1.0";
 
-echo $restUrl;
+//echo $restUrl;
 
 // Configure the REST Client...
 RestClient::setBaseUrl($restUrl); //Settings::UCRM_PUBLIC_URL . "api/v1.0");
@@ -110,8 +110,8 @@ $container["twig"] = function (Container $container)
     $router = $container->get("router");
     $uri = \Slim\Http\Uri::createFromEnvironment(new Environment($_SERVER));
 
-    $query = $uri->getQuery();
-    var_dump($query);
+    //$query = $uri->getQuery();
+    //var_dump($query);
 
     //$route = \App\Middleware\QueryStringRouter::extractRouteFromQueryString($query);
 
@@ -119,7 +119,7 @@ $container["twig"] = function (Container $container)
     //    ->withPath($route)
     //    ->withQuery($query);
 
-    var_dump($uri);
+    //var_dump($uri);
     $twig->addExtension(new \Slim\Views\TwigExtension($router, $uri));
     $twig->addExtension(new Twig_Extension_Debug());
 
@@ -168,5 +168,5 @@ $container['logger'] = function (\Slim\Container $container)
 
 // Applied in Ascending order, bottom up!
 //$www->add(new \UCRM\Routing\Middleware\PluginAuthentication());
-$app->add(new \App\Middleware\QueryStringRouter($container, [__DIR__ . "/www/"], [__DIR__."/app/Views/"]));
+$app->add(new \App\Middleware\QueryStringRouter());
 

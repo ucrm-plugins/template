@@ -5,6 +5,7 @@ namespace App\Middleware;
 
 use MVQN\Common\Strings;
 use Psr\Container\ContainerInterface;
+use Slim\Http\Uri;
 use Slim\Views\Twig;
 use Twig\Loader\FilesystemLoader;
 
@@ -45,10 +46,10 @@ class QueryStringRouter
      * @param ContainerInterface $container
      * @param array $paths
      */
-    public function __construct(ContainerInterface $container, array $paths)
+    public function __construct()
     {
-        $this->container = $container;
-        $this->paths = $paths;
+        //$this->container = $container;
+        //$this->paths = $paths;
     }
 
     // =================================================================================================================
@@ -90,155 +91,29 @@ class QueryStringRouter
 
     public static function extractRouteFromQueryString(string &$queryString): string
     {
-        var_dump($queryString);
         $parts = explode("&", $queryString);
 
         $route = "";
         $query = [];
 
-        var_dump($parts);
-
         foreach($parts as $part)
         {
-            if(Strings::startsWith($part, "/"))
-                $route = $part;
-            else if(Strings::startsWith($part, "route=/"))
-                $route = str_replace("route=/", "/", $part);
-            else if(Strings::startsWith($part, "r=/"))
-                $route = str_replace("r=/", "/", $part);
-            else
-                $query[] = $part;
+            if      (Strings::startsWith($part, "/"))       $route = $part;
+            else if (Strings::startsWith($part, "route=/")) $route = str_replace("route=/", "/", $part);
+            else if (Strings::startsWith($part, "r=/"))     $route = str_replace("r=/", "/", $part);
+            else                                            $query[] = $part;
         }
+
+        if ($route === "/")
+            $route = "/index.php";
 
         $queryString = implode("&", $query);
+
         return $route;
     }
 
-    public static function extractRouteFromQueryArray(array &$queryArray): string
-    {
-        $route = "";
-        $query = [];
-
-        foreach($queryArray as $key => $value)
-        {
-            if(Strings::startsWith($key, "/") && $value === null)
-                $route = $key;
-            else if($key === "route")
-                $route = $value;
-            else if($key === "r")
-                $route = $value;
-            else
-                $query[$key] = $value;
-        }
-
-        $queryArray = $query;
-        return $route;
 
 
-    }
-
-
-
-    // =================================================================================================================
-    // ROUTE PARSING
-    // =================================================================================================================
-
-    /**
-     * Attempts to generate the correct route from the given path.
-     *
-     * @return QueryStringRoute Returns the route determined by the route parsing.
-     */
-    protected function parseRoute(): ?QueryStringRoute
-    {
-        $queryString = $_SERVER["QUERY_STRING"];
-
-
-        $query = [];
-
-        foreach(explode("&", $queryString) as $set)
-        {
-            $parts = explode("=", $set);
-
-            if(Strings::startsWith($parts[0], "/") && (count($parts) === 1 || $parts[1] === null))
-            {
-                $query["route"] = $parts[0];
-            }
-            else if($parts[0] === "route" && (count($parts) === 1 || $parts[1] === null))
-            {
-                $query["route"] = $parts[0];
-            }
-            else if($parts[0] === "r" && (count($parts) === 1 || $parts[1] === null))
-            {
-                $query["route"] = $parts[0];
-            }
-            else
-            {
-                $query[$parts[0]] = count($parts) === 2 ? $parts[1] : null;
-            }
-        }
-
-        if(!array_key_exists("route", $query))
-            $query["route"] = "/index";
-
-        var_dump($query);
-
-        /*
-        // IF no query parameters were provided OR no routing parameter was specified...
-        if ($params === [] || !Strings::startsWith(array_keys($params)[0], "/"))
-            // THEN prepend/merge the root to the parameters for later use!
-            $params = array_merge([ "/index" => "" ], $params);
-
-        // Get the route from the first query string key.
-        $route = array_keys($params)[0];
-
-        // Remove the route from the list of query parameters, so that only the actual query parameters remain.
-        array_shift($params);
-        */
-
-
-        // ---------------------------------------------------------------------------------------------------------
-        // ROUTE EXAMINATION
-        // ---------------------------------------------------------------------------------------------------------
-
-        $route = $query["route"];
-
-        // Explode the route parts.
-        $parts = explode("/", $route);
-
-        // Build the directory and filename from the route parts.
-        $directory = implode("/", array_slice($parts, 0, -1))."/";
-        $filename = $parts[count($parts) - 1] ?: "index";
-
-        var_dump($directory);
-        var_dump($filename);
-
-        if(Strings::startsWith($filename, "."))
-        {
-            $extension = "";
-        }
-        else if(Strings::contains($filename, "."))
-        {
-            $parts = explode(".", $filename);
-
-            $extension = array_pop($parts);
-            $filename = implode(".", $parts);
-        }
-        else
-        {
-            // Start with an empty extension, we will be handling that below.
-            $extension = null;
-        }
-
-        $params = $query;
-        if(array_key_exists("route", $params))
-            unset($params["route"]);
-
-        var_dump($params);
-
-        return new QueryStringRoute($directory, $filename, $extension, $params);
-
-
-    }
 
 
 
@@ -253,26 +128,31 @@ class QueryStringRouter
      */
     public function __invoke($request, $response, $next)
     {
-        // -------------------------------------------------------------------------------------------------------------
-        // QUERY PARAMETERS
-        // -------------------------------------------------------------------------------------------------------------
-        $route = $this->parseRoute();
+        $queryString = isset($_SERVER["QUERY_STRING"]) ? $_SERVER["QUERY_STRING"] : "/";
 
-        echo "<pre>";
-        echo $route;
-        echo "</pre>";
+        $route = $this->extractRouteFromQueryString($queryString);
+
+        parse_str($queryString, $query);
+
+        //var_dump($route);
+        //var_dump($queryString);
+
 
         $uri = $request->getUri()
-            ->withPath($route->getUrl())
-            ->withQuery($route->getQueryString());
+            ->withPath($route)
+            ->withQuery($queryString);
 
         $request = $request
             ->withUri($uri)
-            ->withQueryParams($route->getQuery());
+            ->withQueryParams($query)
+            ->withAttribute("vRoute", $route);
 
-        $_GET = $route->getQuery();
+        $_GET = $query;
+        $_SERVER["QUERY_STRING"] = $queryString;
 
-        var_dump($_GET);
+        var_dump($_SERVER);
+
+        var_dump($request->getUri());
 
         $response = $next($request, $response);
 
