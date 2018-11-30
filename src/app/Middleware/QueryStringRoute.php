@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace UCRM\Routing\Middleware;
+namespace App\Middleware;
 
 class QueryStringRoute
 {

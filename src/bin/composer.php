@@ -30,7 +30,7 @@ switch ($argv[1])
     // Perform initialization of the Plugin libraries and create the auto-generated Settings class.
     case "create":
         Plugin::initialize(__DIR__."/../");
-        Plugin::createSettings("UCRM\\Plugins");
+        Plugin::createSettings("App", "Settings", __DIR__."/../");
         break;
 
     // Bundle the 'zip/' directory into a package ready for Plugin installation on the UCRM server.

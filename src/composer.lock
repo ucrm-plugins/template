@@ -533,16 +533,16 @@
         },
         {
             "name": "mvqn/dynamics",
-            "version": "1.2.4",
+            "version": "1.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mvqn/dynamics.git",
-                "reference": "6055fbc865cec56dbf0d22d6870f76b1774d3a26"
+                "reference": "eeb4a03faf93b5589660b02eb4704f1ed3b11176"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mvqn/dynamics/zipball/6055fbc865cec56dbf0d22d6870f76b1774d3a26",
-                "reference": "6055fbc865cec56dbf0d22d6870f76b1774d3a26",
+                "url": "https://api.github.com/repos/mvqn/dynamics/zipball/eeb4a03faf93b5589660b02eb4704f1ed3b11176",
+                "reference": "eeb4a03faf93b5589660b02eb4704f1ed3b11176",
                 "shasum": ""
             },
             "require": {
@@ -572,7 +572,7 @@
                 }
             ],
             "description": "A library for dynamic objects and methods.",
-            "time": "2018-11-24T04:39:24+00:00"
+            "time": "2018-11-24T19:51:32+00:00"
         },
         {
             "name": "mvqn/localization",
@@ -1586,16 +1586,16 @@
         },
         {
             "name": "ucrm-modules/rest",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ucrm-modules/rest.git",
-                "reference": "ffce59ef2b9eb4746192d72139205b68f1a38bf3"
+                "reference": "ca2a0f3e744bd3dac9aea3aea063785bf1a38ac8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ucrm-modules/rest/zipball/ffce59ef2b9eb4746192d72139205b68f1a38bf3",
-                "reference": "ffce59ef2b9eb4746192d72139205b68f1a38bf3",
+                "url": "https://api.github.com/repos/ucrm-modules/rest/zipball/ca2a0f3e744bd3dac9aea3aea063785bf1a38ac8",
+                "reference": "ca2a0f3e744bd3dac9aea3aea063785bf1a38ac8",
                 "shasum": ""
             },
             "require": {
@@ -1628,7 +1628,7 @@
                 }
             ],
             "description": "A simple REST Client library for interfacing with UCRM Endpoints.",
-            "time": "2018-11-23T23:38:51+00:00"
+            "time": "2018-11-28T07:12:31+00:00"
         }
     ],
     "packages-dev": [

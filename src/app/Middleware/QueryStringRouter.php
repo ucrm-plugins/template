@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace UCRM\Routing\Middleware;
+namespace App\Middleware;
 
 use MVQN\Common\Strings;
 use Psr\Container\ContainerInterface;
@@ -86,6 +86,58 @@ class QueryStringRouter
             return null;
         }
     }
+
+
+    public static function extractRouteFromQueryString(string &$queryString): string
+    {
+        var_dump($queryString);
+        $parts = explode("&", $queryString);
+
+        $route = "";
+        $query = [];
+
+        var_dump($parts);
+
+        foreach($parts as $part)
+        {
+            if(Strings::startsWith($part, "/"))
+                $route = $part;
+            else if(Strings::startsWith($part, "route=/"))
+                $route = str_replace("route=/", "/", $part);
+            else if(Strings::startsWith($part, "r=/"))
+                $route = str_replace("r=/", "/", $part);
+            else
+                $query[] = $part;
+        }
+
+        $queryString = implode("&", $query);
+        return $route;
+    }
+
+    public static function extractRouteFromQueryArray(array &$queryArray): string
+    {
+        $route = "";
+        $query = [];
+
+        foreach($queryArray as $key => $value)
+        {
+            if(Strings::startsWith($key, "/") && $value === null)
+                $route = $key;
+            else if($key === "route")
+                $route = $value;
+            else if($key === "r")
+                $route = $value;
+            else
+                $query[$key] = $value;
+        }
+
+        $queryArray = $query;
+        return $route;
+
+
+    }
+
+
 
     // =================================================================================================================
     // ROUTE PARSING
