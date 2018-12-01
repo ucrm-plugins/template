@@ -12,6 +12,7 @@
         "php": "~7.1",
         "ext-json": "*",
         "ext-zip": "*",
+        "ext-ssh2": "*",
 
         "mvqn/localization": "1.*",
         "mvqn/twig": "1.*",
@@ -31,7 +32,7 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
-            "UCRM\\": "src/UCRM"
+            "MVQN\\": "src/MVQN"
         }
     },
     "autoload-dev": {
@@ -39,12 +40,19 @@
         }
     },
     "scripts": {
+        "sync": [
+            "@php bin/composer.php sync"
+        ],
         "create": [
+            "@php bin/composer.php sync",
             "@php bin/composer.php create"
         ],
         "bundle": [
             "@composer --no-interaction --verbose dump-autoload",
+            "@php bin/composer.php sync",
+            "@php bin/composer.php create",
             "@php bin/composer.php bundle"
         ]
+
     }
 }
