@@ -42,7 +42,14 @@ Plugin::createSettings("App", "Settings", __DIR__);
 // REST CLIENT
 // =====================================================================================================================
 
-if(file_exists(__DIR__."/../.env")) (new \Dotenv\Dotenv(__DIR__."/../"))->load();
+if(file_exists(__DIR__."/../.env"))
+{
+    (new \Dotenv\Dotenv(__DIR__."/../"))->load();
+}
+else
+{
+    Plugin::fixPermissions();
+}
 
 // Generate the REST API URL from either an ENV variable (including from .env file),  or fallback to localhost.
 $restUrl = rtrim(getenv("UCRM_REST_URL") ?: Settings::UCRM_LOCAL_URL ?: "https://localhost/", "/")."/api/v1.0";
